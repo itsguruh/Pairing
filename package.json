@@ -1,14 +1,21 @@
 {
-  "name": "cryptix-md-session",
-  "version": "1.0.0",
-  "main": "app.js",
-  "engines": {
-    "node": "18.x"
+  "name": "CRYPTIX-MD Session",
+  "description": "A Heroku app for generating Session IDs",
+  "repository": "https://github.com/itsguruh/Pairing",
+  "logo": "https://cdn-icons-png.flaticon.com/512/5968/5968322.png",
+  "keywords": ["node", "express", "heroku", "cryptix"],
+  "env": {
+    "NODE_ENV": {
+      "description": "Set the environment to production",
+      "value": "production"
+    }
   },
   "scripts": {
-    "start": "node app.js"
+    "postdeploy": "echo '🚀 CRYPTIX-MD Session deployed successfully!'"
   },
-  "dependencies": {
-    "express": "^4.18.2"
-  }
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
 }
