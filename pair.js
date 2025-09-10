@@ -114,7 +114,7 @@ router.get('/', async (req, res) => {
                                 isForwarded: true,
                                 forwardedNewsletterMessageInfo: {
                                     newsletterJid: '120363302677217436@newsletter',
-                                    newsletterName: 'CASEYRHODES TECH 👻',
+                                    newsletterName: 'ITSGURUH TECH 👻',
                                     serverMessageId: 143
                                 }
                             }
@@ -126,23 +126,23 @@ router.get('/', async (req, res) => {
                     );
 
                     const GIFTED_TEXT = `
-*✅sᴇssɪᴏɴ ɪᴅ ɢᴇɴᴇʀᴀᴛᴇᴅ✅*
+*✅𝗜𝗧𝗦 𝗚𝗨𝗥𝗨 ɪᴅ ɢᴇɴᴇʀᴀᴛᴇᴅ✅*
 ______________________________
 *🎉 SESSION GENERATED SUCCESSFULLY! ✅*
 
 *💪 Empowering Your Experience with Caseyrhodes Bot*
 
 *🌟 Show your support by giving our repo a star! 🌟*
-🔗 https://github.com/caseyweb/CASEYRHODES-XMD
+🔗 https://github.com/itsguruh/CRYPTIX-MD
 
 *💭 Need help? Join our support groups:*
 📢 💬
-https://whatsapp.com/channel/0029VakUEfb4o7qVdkwPk83E
+https://whatsapp.com/channel/0029VbAaqOjLCoX3uQD1Ns3y
 
 *📚 Learn & Explore More with Tutorials:*
 🪄 YouTube Channel https://www.youtube.com/@caseyrhodes01
 
-> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴄᴀsᴇʏʀʜᴏᴅᴇs ᴛᴇᴄʜ
+> ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝗜𝗧𝗦𝗚𝗨𝗥𝗨 ᴛᴇᴄʜ
 *Together, we build the future of automation! 🚀*
 ______________________________
 
@@ -160,7 +160,7 @@ Don't Forget To Give Star⭐ To My Repo`;
                                 isForwarded: true,
                                 forwardedNewsletterMessageInfo: {
                                     newsletterJid: '120363302677217436@newsletter',
-                                    newsletterName: 'CASWYRHODES TECH 🍀',
+                                    newsletterName: 'ITSGURUH TECH 🍀',
                                     serverMessageId: 143
                                 }
                             }
