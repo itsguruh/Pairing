@@ -12,5 +12,19 @@
 
 <h4 align="left">1. 𝐇𝐄𝐑𝐎𝐊𝐔</h4>
 <p align="left">
-<a href='https://dashboard.heroku.com/new?template=https://github.com/itsguruh/itsguruhsession' target="_blank"><img alt='Heroku' src='https://img.shields.io/badge/-Heroku%20Deploy-purple?style=for-the-badge&logo=heroku&logoColor=white'/></a>
+<!-- General Profile -->
+<a href='https://github.com/itsguruh' target="_blank">
+  <img alt='GitHub Profile' src='https://img.shields.io/badge/-My%20GitHub%20Profile-black?style=for-the-badge&logo=github&logoColor=white'/>
+</a>
+</p>
+
+<p align="left">
+<!-- Deploy from a specific repo -->
+<a href='https://dashboard.heroku.com/new?template=https://github.com/itsguruh/sessions' target="_blank">
+  <img alt='Heroku Deploy' src='https://img.shields.io/badge/-Deploy%20Sessions-purple?style=for-the-badge&logo=heroku&logoColor=white'/>
+</a>
+
+<a href='https://dashboard.heroku.com/new?template=https://github.com/itsguruh/another-repo' target="_blank">
+  <img alt='Heroku Deploy' src='https://img.shields.io/badge/-Deploy%20AnotherRepo-purple?style=for-the-badge&logo=heroku&logoColor=white'/>
+</a>
 </p>
