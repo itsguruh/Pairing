@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 
-// Simple homepage route
 app.get("/", (req, res) => {
   res.send(`
     <h1>CRYPTIX-MD Session ID Generator ✅</h1>
@@ -10,7 +9,6 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Make sure to use Heroku's PORT
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
