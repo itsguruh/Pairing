@@ -1,29 +1,21 @@
 const express = require("express");
-const cors = require("cors");
+const app = express();
 const path = require("path");
 
-const pairRouter = require("./pair.js"); // import router
+// Import routes
+const pairRoute = require("./routes/pair");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve static frontend
+// Serve static files (frontend in /public)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Use pair router
-app.use("/", pairRouter);
+// Routes
+app.use("/", pairRoute);
 
-// Default route -> open pair.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "pair.html"));
+// Health check
+app.get("/status", (req, res) => {
+  res.json({ status: "🟢 Server Online", timestamp: new Date().toISOString() });
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
