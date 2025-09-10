@@ -1,73 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caseyrhodes Tech - Premium Pair Code Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---- Your styles (unchanged) ---- */
+    /* (keeping all your CSS exactly as you sent) */
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="container">
+    <div class="logo-container">
+      <img src="https://files.catbox.moe/yedfbr.jpg" alt="Caseyrhodes Tech" class="logo">
+      <div class="logo-glow"></div>
+    </div>
+    
+    <div class="card">
+      <h1>Caseyrhodes Tech Pair Code</h1>
+      <p class="subtitle">Select your country and enter your WhatsApp number to generate your secure pairing code</p>
+      
+      <div class="input-group">
+        <select id="country-code" class="country-select">
+          <option value="">Select Country</option>
+          <option value="254">Kenya (+254)</option>
+          <option value="91">India (+91)</option>
+          <option value="1">USA (+1)</option>
+          <option value="44">UK (+44)</option>
+          <!-- keep rest of your options here -->
+        </select>
+        <input type="tel" id="phone-number" class="input-field" placeholder="Enter WhatsApp number">
+      </div>
 
-const { giftedid } = require('./id');
-const express = require('express');
-const fs = require('fs');
-let router = express.Router();
-const pino = require("pino");
-const { Storage, File } = require("megajs");
+      <button class="submit-btn">Generate Pair Code</button>
+      <div class="result-container"></div>
+    </div>
+  </div>
 
-const {
-    default: Gifted_Tech,
-    useMultiFileAuthState,
-    delay,
-    makeCacheableSignalKeyStore,
-    Browsers
-} = require("@whiskeysockets/baileys");
+  <!-- Script to handle form + fetch -->
+  <script>
+    document.querySelector('.submit-btn').addEventListener('click', async () => {
+      const countryCode = document.getElementById('country-code').value;
+      const phoneNumber = document.getElementById('phone-number').value;
+      const resultContainer = document.querySelector('.result-container');
 
-function randomMegaId(length = 6, numberLength = 4) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    const number = Math.floor(Math.random() * Math.pow(10, numberLength));
-    return `${result}${number}`;
-}
+      if (!countryCode || !phoneNumber) {
+        resultContainer.innerHTML = "⚠️ Please select your country and enter phone number";
+        resultContainer.className = "result-container show warning";
+        return;
+      }
 
-async function uploadCredsToMega(credsPath) {
-    try {
-        const storage = await new Storage({
-            email: process.env.MEGA_EMAIL,      // from Heroku Config Vars
-            password: process.env.MEGA_PASSWORD // from Heroku Config Vars
-        }).ready;
+      const fullNumber = countryCode + phoneNumber;
 
-        console.log('Mega storage initialized.');
-        if (!fs.existsSync(credsPath)) {
-            throw new Error(`File not found: ${credsPath}`);
+      // Show loading animation
+      resultContainer.innerHTML = '<div class="loader"></div> Generating pair code...';
+      resultContainer.className = "result-container show";
+
+      try {
+        // Use Heroku backend
+        const response = await fetch(`https://cryptix-md-3210ab63a8e2.herokuapp.com/pair?number=${fullNumber}`);
+        const data = await response.json();
+
+        if (data.code) {
+          resultContainer.innerHTML = `
+            ✅ Pair Code Generated!<br>
+            <span class="code-display">${data.code}</span>
+            <div class="action-buttons">
+              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
+              <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
+            </div>
+          `;
+
+          // Copy button logic
+          document.querySelector('.copy-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(data.code);
+            document.querySelector('.copy-btn').classList.add('copied');
+            document.querySelector('.copy-btn').innerText = "Copied!";
+          });
+
+          // WhatsApp button logic
+          document.querySelector('.whatsapp-btn').addEventListener('click', () => {
+            window.open(`https://wa.me/?text=Here is my Pair Code: ${data.code}`, "_blank");
+          });
+
+        } else {
+          resultContainer.innerHTML = "❌ Failed to generate code";
+          resultContainer.className = "result-container show error";
         }
-
-        const fileSize = fs.statSync(credsPath).size;
-        const uploadResult = await storage.upload({
-            name: `${randomMegaId()}.json`,
-            size: fileSize
-        }, fs.createReadStream(credsPath)).complete;
-
-        console.log('Session successfully uploaded to Mega.');
-        const fileNode = storage.files[uploadResult.nodeId];
-        const megaUrl = await fileNode.link();
-        console.log(`Session Url: ${megaUrl}`);
-        return megaUrl;
-    } catch (error) {
-        console.error('Error uploading to Mega:', error);
-        throw error;
-    }
-            }
-function removeFile(FilePath) {
-    if (!fs.existsSync(FilePath)) return false;
-    fs.rmSync(FilePath, { recursive: true, force: true });
-}
-
-router.get('/', async (req, res) => {
-    const id = giftedid();
-    let num = req.query.number;
-
-    async function GIFTED_PAIR_CODE() {
-        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
-        try {
-            let Gifted = Gifted_Tech({
-                auth: {
-                    creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+      } catch (err) {
+        console.error(err);
+        resultContainer.innerHTML = "❌ Server error, try again later.";
+        resultContainer.className = "result-container show error";
+      }
+    });
+  </script>
+</body>
+</html>                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
                 },
                 printQRInTerminal: false,
                 logger: pino({ level: "fatal" }).child({ level: "fatal" }),
@@ -136,71 +168,105 @@ const GIFTED_TEXT = `
 │ 🤖 *Bot:* CRYPTIX MD
 │ 👨‍💻 *Author:* GURU
 │ 📞 *Contact:* +254105521300
-╰───────────────◆
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caseyrhodes Tech - Premium Pair Code Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---- Your styles (unchanged) ---- */
+    /* (keeping all your CSS exactly as you sent) */
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="container">
+    <div class="logo-container">
+      <img src="https://files.catbox.moe/yedfbr.jpg" alt="Caseyrhodes Tech" class="logo">
+      <div class="logo-glow"></div>
+    </div>
+    
+    <div class="card">
+      <h1>Caseyrhodes Tech Pair Code</h1>
+      <p class="subtitle">Select your country and enter your WhatsApp number to generate your secure pairing code</p>
+      
+      <div class="input-group">
+        <select id="country-code" class="country-select">
+          <option value="">Select Country</option>
+          <option value="254">Kenya (+254)</option>
+          <option value="91">India (+91)</option>
+          <option value="1">USA (+1)</option>
+          <option value="44">UK (+44)</option>
+          <!-- keep rest of your options here -->
+        </select>
+        <input type="tel" id="phone-number" class="input-field" placeholder="Enter WhatsApp number">
+      </div>
 
-⭐ *Support & Resources*  
-🔗 Repo: https://github.com/itsguruh/CRYPTIX-MD  
-📢 Channel: https://whatsapp.com/channel/0029VbAaqOjLCoX3uQD1Ns3y  
-🎬 YouTube: https://www.youtube.com/@caseyrhodes01  
+      <button class="submit-btn">Generate Pair Code</button>
+      <div class="result-container"></div>
+    </div>
+  </div>
 
-╭─────────────────◆
-│ 🚀 *Powered by CRYPTIX MD*  
-│ 🔮 *Innovation Meets Automation!*  
-╰─────────────────◆
+  <!-- Script to handle form + fetch -->
+  <script>
+    document.querySelector('.submit-btn').addEventListener('click', async () => {
+      const countryCode = document.getElementById('country-code').value;
+      const phoneNumber = document.getElementById('phone-number').value;
+      const resultContainer = document.querySelector('.result-container');
 
-╚══✪〘 End of Session 〙✪══╝
-`;
-______________________________
+      if (!countryCode || !phoneNumber) {
+        resultContainer.innerHTML = "⚠️ Please select your country and enter phone number";
+        resultContainer.className = "result-container show warning";
+        return;
+      }
 
-Use your Session ID Above to Deploy your Bot.
-Check on YouTube Channel for Deployment Procedure(Ensure you have Github Account and Billed Heroku Account First.)
-Don't Forget To Give Star⭐ To My Repo`;
+      const fullNumber = countryCode + phoneNumber;
 
-                    await Gifted.sendMessage(
-                        Gifted.user.id,
-                        {
-                            text: GIFTED_TEXT,
-                            contextInfo: {
-                                mentionedJid: [Gifted.user.id],
-                                forwardingScore: 999,
-                                isForwarded: true,
-                                forwardedNewsletterMessageInfo: {
-                                    newsletterJid: '120363302677217436@newsletter',
-                                    newsletterName: 'ITSGURUH TECH 🍀',
-                                    serverMessageId: 143
-                                }
-                            }
-                        },
-                        {
-                            quoted: sidMsg,
-                            disappearingMessagesInChat: true,
-                            ephemeralExpiration: 86400
-                        }
-                    );
+      // Show loading animation
+      resultContainer.innerHTML = '<div class="loader"></div> Generating pair code...';
+      resultContainer.className = "result-container show";
 
-                    await delay(100);
-                    await Gifted.ws.close();
-                    return await removeFile('./temp/' + id);
-                } else if (
-                    connection === "close" &&
-                    lastDisconnect &&
-                    lastDisconnect.error &&
-                    lastDisconnect.error.output.statusCode != 401
-                ) {
-                    await delay(10000);
-                    GIFTED_PAIR_CODE();
-                }
-            });
-        } catch (err) {
-            console.error("Service Has Been Restarted:", err);
-            await removeFile('./temp/' + id);
-            if (!res.headersSent) {
-                await res.send({ code: "Service is Currently Unavailable" });
-            }
+      try {
+        // Use Heroku backend
+        const response = await fetch(`https://cryptix-md-3210ab63a8e2.herokuapp.com/pair?number=${fullNumber}`);
+        const data = await response.json();
+
+        if (data.code) {
+          resultContainer.innerHTML = `
+            ✅ Pair Code Generated!<br>
+            <span class="code-display">${data.code}</span>
+            <div class="action-buttons">
+              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
+              <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
+            </div>
+          `;
+
+          // Copy button logic
+          document.querySelector('.copy-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(data.code);
+            document.querySelector('.copy-btn').classList.add('copied');
+            document.querySelector('.copy-btn').innerText = "Copied!";
+          });
+
+          // WhatsApp button logic
+          document.querySelector('.whatsapp-btn').addEventListener('click', () => {
+            window.open(`https://wa.me/?text=Here is my Pair Code: ${data.code}`, "_blank");
+          });
+
+        } else {
+          resultContainer.innerHTML = "❌ Failed to generate code";
+          resultContainer.className = "result-container show error";
         }
-    }
-
-    return await GIFTED_PAIR_CODE();
-});
-
-module.exports = router;
+      } catch (err) {
+        console.error(err);
+        resultContainer.innerHTML = "❌ Server error, try again later.";
+        resultContainer.className = "result-container show error";
+      }
+    });
+  </script>
+</body>
+</html>
