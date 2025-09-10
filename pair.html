@@ -3,74 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRYPTIX MD Pairing</title>
+  <title>Caseyrhodes Tech - Premium Pair Code Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0d0d0d;
-      color: #00ff00;
-      text-align: center;
-      padding: 50px;
-    }
-    h2 {
-      margin-bottom: 20px;
-    }
-    input {
-      padding: 10px;
-      width: 250px;
-      border: none;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    button {
-      padding: 10px 20px;
-      background: #00ff00;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #00cc00;
-    }
-    pre {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 5px;
-      background: #1a1a1a;
-      color: #ffffff;
-      text-align: left;
-      display: inline-block;
-    }
+    /* keep all your CSS unchanged */
   </style>
 </head>
-<body>
-  <h2>🔐 CRYPTIX MD - Get Your Pairing Code</h2>
-  <p>Enter your WhatsApp number with country code (e.g., 2547xxxxxxx)</p>
+<body data-theme="dark">
+  <div class="container">
+    <div class="logo-container">
+      <img src="https://files.catbox.moe/yedfbr.jpg" alt="Caseyrhodes Tech" class="logo">
+      <div class="logo-glow"></div>
+    </div>
+    
+    <div class="card">
+      <h1>Caseyrhodes Tech Pair Code</h1>
+      <p class="subtitle">Select your country and enter your WhatsApp number to generate your secure pairing code</p>
+      
+      <div class="input-group">
+        <select id="country-code" class="country-select">
+          <option value="">Select Country</option>
+          <option value="254">Kenya (+254)</option>
+          <option value="91">India (+91)</option>
+          <option value="1">USA (+1)</option>
+          <option value="44">UK (+44)</option>
+          <!-- add more countries as needed -->
+        </select>
+        <input type="tel" id="phone-number" class="input-field" placeholder="Enter WhatsApp number">
+      </div>
 
-  <input type="text" id="number" placeholder="e.g. 2547xxxxxxx">
-  <br>
-  <button onclick="getCode()">Get Pairing Code</button>
+      <button class="submit-btn">Generate Pair Code</button>
+      <div class="result-container"></div>
+    </div>
+  </div>
 
-  <pre id="result"></pre>
-
+  <!-- Script -->
   <script>
-    async function getCode() {
-      const number = document.getElementById('number').value.trim();
-      if (!number) {
-        document.getElementById('result').textContent = "⚠️ Please enter a valid number.";
+    document.querySelector('.submit-btn').addEventListener('click', async () => {
+      const countryCode = document.getElementById('country-code').value;
+      const phoneNumber = document.getElementById('phone-number').value;
+      const resultContainer = document.querySelector('.result-container');
+
+      if (!countryCode || !phoneNumber) {
+        resultContainer.innerHTML = "⚠️ Please select your country and enter phone number";
+        resultContainer.className = "result-container show warning";
         return;
       }
 
+      const fullNumber = countryCode + phoneNumber;
+
+      // Show loading animation
+      resultContainer.innerHTML = '<div class="loader"></div> Generating pair code...';
+      resultContainer.className = "result-container show";
+
       try {
-        const res = await fetch(`/pair?number=${number}`);
-        const data = await res.json();
+        // Call backend (relative path, works on local + Heroku)
+        const response = await fetch(`/pair?number=${fullNumber}`);
+        const data = await response.json();
+
         if (data.code) {
-          document.getElementById('result').textContent = "✅ Your Pairing Code: " + data.code;
+          resultContainer.innerHTML = `
+            ✅ Pair Code Generated!<br>
+            <span class="code-display">${data.code}</span>
+            <div class="action-buttons">
+              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
+              <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
+            </div>
+          `;
+
+          // Copy button
+          document.querySelector('.copy-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(data.code);
+            document.querySelector('.copy-btn').classList.add('copied');
+            document.querySelector('.copy-btn').innerText = "Copied!";
+          });
+
+          // WhatsApp button
+          document.querySelector('.whatsapp-btn').addEventListener('click', () => {
+            window.open(`https://wa.me/?text=Here is my Pair Code: ${data.code}`, "_blank");
+          });
+
         } else {
-          document.getElementById('result').textContent = "❌ Failed: " + JSON.stringify(data);
+          resultContainer.innerHTML = "❌ Failed to generate code";
+          resultContainer.className = "result-container show error";
         }
+      } catch (err) {
+        console.error(err);
+        resultContainer.innerHTML = "❌ Server error, try again later.";
+        resultContainer.className = "result-container show error";
+      }
+    });
+  </script>
+</body>
+</html>        }
       } catch (err) {
         document.getElementById('result').textContent = "🚨 Error: " + err.message;
       }
