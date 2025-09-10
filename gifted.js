@@ -68,4 +68,13 @@ CRYPTIX-MD Session Server Running on http://localhost:${PORT}
   `);
 });
 
+module.exports = app;// Start server
+app.listen(PORT, () => {
+  console.log(`
+Deployment Successful!
+
+CRYPTIX-MD Session Server Running on http://localhost:${PORT}
+  `);
+});
+
 module.exports = app;
