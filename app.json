@@ -1,22 +1,7 @@
 {
-    "name": "Kerm Session Generator",
-    "description": "I'm Web Session Generator by Kg Tech",
-    "logo": "",
-    "repository": "https://github.com/Giftedmaurice/giftedmdV2-session-generator",
-    "keywords": ["@Xcelsama"],
-    "success_url": "/", 
-    "buildpacks": [{ "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest" } ],
-    "env": {      
-      "PORT": {
-        "description": "Port for web app.4000,5000,3000... any!",
-        "value": "5000",
-        "required": false 
-      },
-      "MESSAGE": {
-        "description": "",
-        "value": "",
-        "required": false 
-      }
-    }   
-
+  "name": "CRYPTIX-MD Session ID Generator",
+  "description": "Generate WhatsApp Session IDs for CRYPTIX-MD Bot",
+  "repository": "https://github.com/itsguruh/Pairing",
+  "logo": "https://img.icons8.com/clouds/452/heroku.png",
+  "keywords": ["node", "heroku", "whatsapp", "session-id"]
 }
