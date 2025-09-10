@@ -1,76 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caseyrhodes Tech - Premium Pair Code Generator</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ---- Your styles (unchanged) ---- */
-    /* (keeping all your CSS exactly as you sent) */
-  </style>
-</head>
-<body data-theme="dark">
-  <div class="container">
-    <div class="logo-container">
-      <img src="https://files.catbox.moe/yedfbr.jpg" alt="Caseyrhodes Tech" class="logo">
-      <div class="logo-glow"></div>
-    </div>
-    
-    <div class="card">
-      <h1>Caseyrhodes Tech Pair Code</h1>
-      <p class="subtitle">Select your country and enter your WhatsApp number to generate your secure pairing code</p>
-      
-      <div class="input-group">
-        <select id="country-code" class="country-select">
-          <option value="">Select Country</option>
-          <option value="254">Kenya (+254)</option>
-          <option value="91">India (+91)</option>
-          <option value="1">USA (+1)</option>
-          <option value="44">UK (+44)</option>
-          <!-- keep rest of your options here -->
-        </select>
-        <input type="tel" id="phone-number" class="input-field" placeholder="Enter WhatsApp number">
-      </div>
+const express = require("express");
+const pino = require("pino");
+const fs = require("fs");
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  makeCacheableSignalKeyStore,
+  delay,
+  Browsers
+} = require("@whiskeysockets/baileys");
 
-      <button class="submit-btn">Generate Pair Code</button>
-      <div class="result-container"></div>
-    </div>
-  </div>
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  <!-- Script to handle form + fetch -->
-  <script>
-    document.querySelector('.submit-btn').addEventListener('click', async () => {
-      const countryCode = document.getElementById('country-code').value;
-      const phoneNumber = document.getElementById('phone-number').value;
-      const resultContainer = document.querySelector('.result-container');
+app.get("/pair", async (req, res) => {
+  try {
+    let num = req.query.number;
+    if (!num) return res.status(400).json({ error: "Missing number" });
 
-      if (!countryCode || !phoneNumber) {
-        resultContainer.innerHTML = "⚠️ Please select your country and enter phone number";
-        resultContainer.className = "result-container show warning";
-        return;
-      }
+    // Clean number
+    num = num.replace(/[^0-9]/g, "");
 
-      const fullNumber = countryCode + phoneNumber;
+    const { state, saveCreds } = await useMultiFileAuthState("./session");
 
-      // Show loading animation
-      resultContainer.innerHTML = '<div class="loader"></div> Generating pair code...';
-      resultContainer.className = "result-container show";
+    const Gifted = makeWASocket({
+      auth: {
+        creds: state.creds,
+        keys: makeCacheableSignalKeyStore(
+          state.keys,
+          pino({ level: "fatal" }).child({ level: "fatal" })
+        ),
+      },
+      printQRInTerminal: false,
+      logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+      browser: Browsers.macOS("Safari"),
+    });
 
-      try {
-        // Use Heroku backend
-        const response = await fetch(`https://cryptix-md-3210ab63a8e2.herokuapp.com/pair?number=${fullNumber}`);
-        const data = await response.json();
+    // Listen for credential updates
+    Gifted.ev.on("creds.update", saveCreds);
 
-        if (data.code) {
-          resultContainer.innerHTML = `
-            ✅ Pair Code Generated!<br>
-            <span class="code-display">${data.code}</span>
-            <div class="action-buttons">
-              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
+    // If not registered, request pairing code
+    if (!Gifted.authState.creds.registered) {
+      await delay(1500);
+      const code = await Gifted.requestPairingCode(num);
+      console.log(`Your Code: ${code}`);
+      return res.json({ code });
+    }
+
+    return res.json({ error: "Already registered, no new code generated" });
+  } catch (err) {
+    console.error("Pairing error:", err);
+    return res.status(500).json({ error: "Server error while generating code" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ Pair server running on port ${PORT}`);
+});              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
               <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
             </div>
           `;
