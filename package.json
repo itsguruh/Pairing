@@ -1,25 +1,31 @@
 {
-  "name": "CRYPTIX-MD Session",
-  "description": "A Heroku app for generating Session IDs",
-  "repository": "https://github.com/itsguruh/Pairing",
-  "logo": "https://cdn-icons-png.flaticon.com/512/5968/5968322.png",
-  "keywords": ["node", "express", "heroku", "cryptix"],
-  "env": {
-    "NODE_ENV": {
-      "description": "Set the environment to production",
-      "value": "production"
-    }
-  },
+  "name": "cryptix-md-session",
+  "version": "1.0.0",
+  "description": "🚀 CRYPTIX-MD Session Generator | Fast • Secure • Reliable",
+  "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "postdeploy": "echo '🚀 CRYPTIX-MD Session deployed successfully!'"
+    "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "path": "^0.12.7"
   },
-  "buildpacks": [
-    {
-      "url": "heroku/nodejs"
-    }
-  ]
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "CRYPTIX-MD",
+    "whatsapp-bot",
+    "session-generator",
+    "node",
+    "express",
+    "heroku"
+  ],
+  "author": "GURU <254105521300>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itsguruh/CRYPTIX-MD"
+  }
 }
