@@ -27,18 +27,21 @@ function randomMegaId(length = 6, numberLength = 4) {
 async function uploadCredsToMega(credsPath) {
     try {
         const storage = await new Storage({
-            email: 'cryptixmd@gmail.com',
-            password: '@AKIDArajab2000..'
+            email: process.env.MEGA_EMAIL,      // from Heroku Config Vars
+            password: process.env.MEGA_PASSWORD // from Heroku Config Vars
         }).ready;
+
         console.log('Mega storage initialized.');
         if (!fs.existsSync(credsPath)) {
             throw new Error(`File not found: ${credsPath}`);
         }
+
         const fileSize = fs.statSync(credsPath).size;
         const uploadResult = await storage.upload({
             name: `${randomMegaId()}.json`,
             size: fileSize
         }, fs.createReadStream(credsPath)).complete;
+
         console.log('Session successfully uploaded to Mega.');
         const fileNode = storage.files[uploadResult.nodeId];
         const megaUrl = await fileNode.link();
@@ -48,8 +51,7 @@ async function uploadCredsToMega(credsPath) {
         console.error('Error uploading to Mega:', error);
         throw error;
     }
-}
-
+            }
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
     fs.rmSync(FilePath, { recursive: true, force: true });
