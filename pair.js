@@ -27,8 +27,8 @@ function randomMegaId(length = 6, numberLength = 4) {
 async function uploadCredsToMega(credsPath) {
     try {
         const storage = await new Storage({
-            email: 'palvinkibet46@gmail.com',
-            password: 'caseytech@2030'
+            email: 'cryptixmd@gmail.com',
+            password: '@AKIDArajab2000..'
         }).ready;
         console.log('Mega storage initialized.');
         if (!fs.existsSync(credsPath)) {
@@ -125,25 +125,29 @@ router.get('/', async (req, res) => {
                         }
                     );
 
-                    const GIFTED_TEXT = `
-*✅𝗜𝗧𝗦 𝗚𝗨𝗥𝗨 ɪᴅ ɢᴇɴᴇʀᴀᴛᴇᴅ✅*
-______________________________
-*🎉 SESSION GENERATED SUCCESSFULLY! ✅*
+const GIFTED_TEXT = `
+╔══✪〘 *CRYPTIX MD SESSION* 〙✪══╗
 
-*💪 Empowering Your Experience with Caseyrhodes Bot*
+✅ *SESSION GENERATED SUCCESSFULLY!*
 
-*🌟 Show your support by giving our repo a star! 🌟*
-🔗 https://github.com/itsguruh/CRYPTIX-MD
+╭───────────────◆
+│ 🤖 *Bot:* CRYPTIX MD
+│ 👨‍💻 *Author:* GURU
+│ 📞 *Contact:* +254105521300
+╰───────────────◆
 
-*💭 Need help? Join our support groups:*
-📢 💬
-https://whatsapp.com/channel/0029VbAaqOjLCoX3uQD1Ns3y
+⭐ *Support & Resources*  
+🔗 Repo: https://github.com/itsguruh/CRYPTIX-MD  
+📢 Channel: https://whatsapp.com/channel/0029VbAaqOjLCoX3uQD1Ns3y  
+🎬 YouTube: https://www.youtube.com/@caseyrhodes01  
 
-*📚 Learn & Explore More with Tutorials:*
-🪄 YouTube Channel https://www.youtube.com/@caseyrhodes01
+╭─────────────────◆
+│ 🚀 *Powered by CRYPTIX MD*  
+│ 🔮 *Innovation Meets Automation!*  
+╰─────────────────◆
 
-> ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝗜𝗧𝗦𝗚𝗨𝗥𝗨 ᴛᴇᴄʜ
-*Together, we build the future of automation! 🚀*
+╚══✪〘 End of Session 〙✪══╝
+`;
 ______________________________
 
 Use your Session ID Above to Deploy your Bot.
