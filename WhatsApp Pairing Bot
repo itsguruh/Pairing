@@ -1,1 +1,59 @@
+const pino = require("pino");
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  makeCacheableSignalKeyStore,
+  delay,
+  Browsers,
+  DisconnectReason,
+} = require("@whiskeysockets/baileys");
 
+// Bot startup function
+const startBot = async () => {
+  const { state, saveCreds } = await useMultiFileAuthState("session");
+  const Gifted = makeWASocket({
+    auth: {
+      creds: state.creds,
+      keys: makeCacheableSignalKeyStore(
+        state.keys,
+        pino({ level: "fatal" }).child({ level: "fatal" })
+      ),
+    },
+    printQRInTerminal: false,
+    logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+    browser: Browsers.macOS("Safari"),
+  });
+
+  Gifted.ev.on("creds.update", saveCreds);
+
+  Gifted.ev.on("connection.update", async (update) => {
+    const { connection, lastDisconnect, qr } = update;
+    if (connection === "close") {
+      const shouldReconnect =
+        lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
+      if (shouldReconnect) {
+        console.log("Connection closed due to " + lastDisconnect.error + ", reconnecting...");
+        startBot(); // Reconnect
+      } else {
+        console.log("Connection logged out. Please generate a new pairing code.");
+      }
+    } else if (connection === "open") {
+      console.log("✅ Bot connected successfully!");
+    }
+
+    if (qr && !Gifted.authState.creds.registered) {
+      await delay(1500);
+      const num = "254105521300"; // Replace with your number
+      const code = await Gifted.requestPairingCode(num);
+      console.log(`✅ Pairing Code generated: ${code}`);
+    }
+  });
+
+  if (!Gifted.authState.creds.registered) {
+    console.log("Generating a new pairing code...");
+  } else {
+    console.log("Bot already registered. To reset, delete the session folder.");
+  }
+};
+
+startBot();
