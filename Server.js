@@ -1,107 +1,110 @@
 require('dotenv').config();
 const express = require('express');
 const pino = require('pino');
+const QRCode = require('qrcode');
 const {
   default: makeWASocket,
   useSingleFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion
 } = require('@whiskeysockets/baileys');
-const QRCode = require('qrcode');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const logger = pino({ level: 'silent' });
+const logger = pino({ level: 'info' });
 
 const { state, saveState } = useSingleFileAuthState('./auth_info.json');
 
 let qrCodeBase64 = null;
+let pairingCode = null;
 let isConnected = false;
 let sock;
 
 // Homepage
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   res.send(`
-    <h1>CRYPTIX-MD Session Generator ✅</h1>
-    <p>Use <a href="/qr">/qr</a> to scan QR code</p>
-    <p>Use <a href="/pair">/pair</a> to enter pairing code</p>
-    <p>Use <a href="/status">/status</a> to check connection</p>
+    <h1>🚀 CRYPTIX-MD Session Generator</h1>
+    <p>Welcome! Use:</p>
+    <ul>
+      <li><a href="/qr">/qr</a> → Get QR code login</li>
+      <li><a href="/pair">/pair</a> → Get pairing code login</li>
+      <li><a href="/status">/status</a> → Check bot connection</li>
+    </ul>
   `);
 });
 
-// QR route
-app.get("/qr", (req, res) => {
-  if (!qrCodeBase64) return res.status(404).send("QR not generated yet.");
-  const img = Buffer.from(qrCodeBase64.split(',')[1], "base64");
+// Show QR code
+app.get('/qr', (req, res) => {
+  if (!qrCodeBase64) return res.status(404).send('QR Code not ready yet ❌');
+  const img = Buffer.from(qrCodeBase64.split(',')[1], 'base64');
   res.writeHead(200, {
-    "Content-Type": "image/png",
-    "Content-Length": img.length
+    'Content-Type': 'image/png',
+    'Content-Length': img.length
   });
   res.end(img);
 });
 
-// Pairing route
-app.get("/pair", (req, res) => {
-  res.send("🚀 Pairing code mode is active. Enter your code via bot console.");
+// Show Pairing code
+app.get('/pair', async (req, res) => {
+  if (isConnected) {
+    return res.send("✅ Already connected. No pairing needed.");
+  }
+  if (!sock) {
+    return res.send("❌ Bot is not initialized yet. Try again in a few seconds.");
+  }
+
+  try {
+    // Request new pairing code from WhatsApp
+    const code = await sock.requestPairingCode(process.env.WHATSAPP_NUMBER || "");
+    pairingCode = code;
+    res.send(`
+      <h2>🔗 Your Pairing Code</h2>
+      <p style="font-size:20px; font-weight:bold; color:green;">${code}</p>
+      <p>Enter this code on WhatsApp ➝ Linked Devices ➝ Add Device</p>
+    `);
+  } catch (err) {
+    res.status(500).send("⚠️ Error generating pairing code: " + err.message);
+  }
 });
 
-// Status route
-app.get("/status", (req, res) => {
+// Status
+app.get('/status', (req, res) => {
   res.json({ connected: isConnected });
 });
 
 // Start bot
 async function startBot() {
   const { version } = await fetchLatestBaileysVersion();
-  
   sock = makeWASocket({
     version,
     logger,
-    printQRInTerminal: true,
     auth: state,
+    printQRInTerminal: true,
   });
 
-  sock.ev.on("connection.update", async (update) => {
+  sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
       qrCodeBase64 = await QRCode.toDataURL(qr);
-      console.log("📲 Scan QR at: http://localhost:" + PORT + "/qr");
+      logger.info("📱 Scan the QR from /qr to connect.");
     }
 
-    if (connection === "open") {
+    if (connection === 'close') {
+      const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+      logger.info("❌ Connection closed, reconnecting: " + shouldReconnect);
+      if (shouldReconnect) startBot();
+    } else if (connection === 'open') {
       isConnected = true;
-      console.log("✅ CRYPTIX-MD connected successfully!");
-
-      try {
-        // Send welcome text
-        await sock.sendMessage(sock.user.id, {
-          text: `🎉 Welcome to *CRYPTIX-MD Bot* ✅\n\nYour bot is now live and ready to use 🚀.\n\n⚡ Features:\n- QR Login\n- Pairing Code\n- Public Access\n- Auto Welcome`
-        });
-
-        // Send branded welcome image
-        await sock.sendMessage(sock.user.id, {
-          image: { url: "https://i.ibb.co/DkqQyRF/cryptix-md-banner.png" }, // Replace this link with your new banner
-          caption: "🔥 Welcome to CRYPTIX-MD 🔥\n\nYour WhatsApp Session is secured and ready 🚀"
-        });
-
-      } catch (e) {
-        console.error("❌ Failed to send welcome message:", e);
-      }
-    } else if (connection === "close") {
-      const reason = lastDisconnect?.error?.output?.statusCode;
-      if (reason !== DisconnectReason.loggedOut) {
-        console.log("Reconnecting...");
-        startBot();
-      } else {
-        console.log("Logged out. Delete auth_info.json and restart.");
-      }
+      logger.info("✅ Bot connected successfully!");
     }
   });
 
-  sock.ev.on("creds.update", saveState);
+  sock.ev.on('creds.update', saveState);
 }
 
-startBot();
-
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start Express + Bot
+app.listen(PORT, () => {
+  console.log(`Server running on PORT ${PORT}`);
+  startBot();
+});
