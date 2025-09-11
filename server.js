@@ -13,6 +13,11 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Start the server immediately, before any bot initialization.
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
 // This will store the generated pairing code.
 let globalPairingCode = null;
 
@@ -86,8 +91,3 @@ const publicPath = path.join(__dirname, "public");
 if (!require("fs").existsSync(publicPath)) {
     require("fs").mkdirSync(publicPath);
 }
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
