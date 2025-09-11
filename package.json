@@ -1,17 +1,17 @@
 {
-  "name": "cryptix-md",
+  "name": "whatsapp-pairing-bot",
   "version": "1.0.0",
-  "description": "CRYPTIX MD Pairing Server",
+  "description": "WhatsApp bot pairing system with Baileys",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.5",
+    "express": "^4.18.2",
+    "pino": "^8.14.1"
+  },
   "engines": {
     "node": "18.x"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "pino": "^8.17.0",
-    "@whiskeysockets/baileys": "^6.7.7"
   }
 }
