@@ -9,7 +9,7 @@ const {
   Browsers
 } = require("@whiskeysockets/baileys");
 
-// Pairing endpoint
+// 📌 Pairing endpoint
 router.get("/pair", async (req, res) => {
   try {
     let num = req.query.number;
