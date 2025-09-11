@@ -1,13 +1,13 @@
 const express = require("express");
-const path = require("path");
 const pino = require("pino");
+const path = require("path");
 const {
   default: makeWASocket,
   useMultiFileAuthState,
   makeCacheableSignalKeyStore,
   delay,
   Browsers,
-  DisconnectReason
+  DisconnectReason,
 } = require("@whiskeysockets/baileys");
 
 const app = express();
@@ -46,13 +46,13 @@ const startBot = async () => {
         startBot(); // Reconnect
       } else {
         console.log("Connection logged out. Please generate a new pairing code.");
+        globalPairingCode = "Logged out. Please restart the app."
       }
     } else if (connection === "open") {
       console.log("✅ Bot connected successfully!");
     }
 
     if (qr && !Gifted.authState.creds.registered) {
-      // This is where the code is generated on startup
       await delay(1500);
       const num = "254105521300"; // Replace with the number you want to use
       const code = await Gifted.requestPairingCode(num);
@@ -65,24 +65,29 @@ const startBot = async () => {
     console.log("Generating a new pairing code...");
   } else {
     console.log("Bot already registered. To reset, delete the session folder.");
+    globalPairingCode = "Already Registered. To reset, delete the session folder."
   }
 };
 
 startBot();
 
-// Routes
-const pairRoutes = require("./routes/pair")(globalPairingCode);
-app.use("/api", pairRoutes); // The new /pair route will be here
+// Endpoint to get the pairing code
+app.get("/code", (req, res) => {
+  res.json({ code: globalPairingCode });
+});
 
-// Serve static files
-app.use(express.static(path.join(__dirname, "public")));
-
-// Default route
+// Serve the static pairing.html file
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "pairing.html"));
 });
 
-// Start server
+// Create a 'public' directory if it doesn't exist
+const publicPath = path.join(__dirname, "public");
+if (!require("fs").existsSync(publicPath)) {
+    require("fs").mkdirSync(publicPath);
+}
+
+// Start the server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
