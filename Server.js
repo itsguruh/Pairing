@@ -38,71 +38,22 @@ app.get('/status', (req, res) => {
 });
 
 async function startBot() {
-  const { version } = await fetchLatestBaileysVersion();
-  const sock = makeWASocket({
-    version,
-    auth: state,
-    printQRInTerminal: false,
-    getMessage: async () => ({ conversation: 'placeholder' }),
-  });
+const express = require("express");
+const app = express();
 
-  sock.ev.on('connection.update', (update) => {
-    const { connection, lastDisconnect, qr } = update;
-
-    if (qr) {
-      const QRCode = require('qrcode');
-      QRCode.toDataURL(qr, (err, url) => {
-        qrCodeBase64 = url;
-        logger.info('QR code generated. Visit /qr to scan.');
-      });
-    }
-
-    if (connection === 'open') {
-      logger.info('✅ Bot is connected to WhatsApp!');
-      isConnected = true;
-      qrCodeBase64 = null;
-    }
-
-    if (connection === 'close') {
-      isConnected = false;
-      const reason = lastDisconnect?.error?.output?.statusCode;
-      logger.warn(`❌ Connection closed. Reason: ${reason}`);
-      if (reason !== DisconnectReason.loggedOut) {
-        logger.info('Reconnecting...');
-        startBot();
-      }
-    }
-  });
-
-  sock.ev.on('creds.update', saveState);
-
-  sock.ev.on('messages.upsert', async ({ messages }) => {
-    const msg = messages[0];
-    if (!msg.message || msg.key.fromMe) return;
-
-    const from = msg.key.remoteJid;
-    const messageType = Object.keys(msg.message)[0];
-    let text = '';
-
-    if (msg.message.conversation) text = msg.message.conversation;
-    else if (msg.message[messageType]?.text) text = msg.message[messageType].text;
-    else if (msg.message[messageType]?.caption) text = msg.message[messageType].caption;
-
-    if (text === '!ping') {
-      await sock.sendMessage(from, { text: 'Pong! 🏓' });
-    } else if (text === '!help') {
-      await sock.sendMessage(from, {
-        text: '*CRYPTIX-MD Commands:*\n\n' +
-              '• `!ping` - Bot status\n' +
-              '• `!help` - Show help'
-      });
-    } else {
-      await sock.sendMessage(from, { text: `Hi! Type *!help* to see available commands.` });
-    }
-  });
-}
-
-app.listen(PORT, () => {
-  logger.info(`🌐 Express server started on port ${PORT}`);
-  startBot();
+// Homepage
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>CRYPTIX-MD Session Generator ✅</h1>
+    <p>Welcome! Use <a href="/pair">/pair</a> to generate your Session ID.</p>
+  `);
 });
+
+// Pairing route
+app.get("/pair", (req, res) => {
+  res.send("QR Code & Pairing logic will be here 🚀");
+});
+
+// Heroku PORT
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
