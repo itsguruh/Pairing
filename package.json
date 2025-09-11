@@ -1,21 +1,18 @@
 {
-  "name": "cryptix-md",
+  "name": "cryptix-md-pairing",
   "version": "1.0.0",
-  "description": "CRYPTIX-MD - WhatsApp bot using Baileys",
-  "main": "server.js",
+  "description": "CRYPTIX-MD Public Session Generator (QR + Pairing Code)",
+  "main": "Server.js",
   "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.5",
-    "express": "^4.18.2",
-    "pino": "^8.14.1",
-    "dotenv": "^16.3.1",
-    "qrcode": "^1.5.1"
+    "start": "node Server.js"
   },
   "engines": {
     "node": "18.x"
   },
-  "author": "GURU",
-  "license": "MIT"
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.5",
+    "express": "^4.18.2",
+    "pino": "^8.17.0",
+    "qrcode": "^1.5.3"
+  }
 }
