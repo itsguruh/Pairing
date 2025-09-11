@@ -3,420 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRYPTIX Tech - Pair Code Generator</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>CRYPTIX MD Pairing</title>
   <style>
     body {
-      font-family: 'Montserrat', sans-serif;
-      background: #000;
+      background: linear-gradient(135deg, #000000, #111111);
       color: #fff;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       margin: 0;
-      padding: 0;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      text-align: center;
-    }
-    /* Bot Image with Neon Effect */
-    .bot-image {
-      width: 180px;
-      height: 180px;
+    img {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
-      margin: 20px auto;
-      display: block;
-      border: 4px solid transparent;
-      background: linear-gradient(45deg, #00ffcc, #ff00cc, #00ccff, #ff9900);
-      background-size: 300% 300%;
-      animation: glowMove 6s ease infinite;
-      padding: 5px;
-      box-shadow: 0 0 30px rgba(0, 255, 200, 0.6);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 20px #0f0;
+      margin-bottom: 20px;
     }
-    .bot-image:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 50px rgba(255, 0, 200, 0.8);
+    h1 {
+      color: #0f0;
+      text-shadow: 0 0 10px #0f0;
+      margin-bottom: 10px;
     }
-    @keyframes glowMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .card {
-      background: #111;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
-    .subtitle {
+    p {
+      margin: 5px 0 20px;
       font-size: 14px;
-      margin-bottom: 15px;
       color: #bbb;
     }
-    .input-group {
-      display: flex;
-      margin-bottom: 15px;
-    }
-    .country-select, .input-field {
+    input {
       padding: 10px;
-      border-radius: 6px;
-      border: none;
+      border: 2px solid #0f0;
+      border-radius: 8px;
       outline: none;
+      width: 250px;
+      margin-bottom: 15px;
+      font-size: 16px;
     }
-    .country-select {
-      width: 45%;
-      margin-right: 5px;
-    }
-    .input-field {
-      width: 55%;
-    }
-    .submit-btn {
-      padding: 10px 15px;
+    button {
+      background: #0f0;
+      color: #000;
+      padding: 10px 20px;
+      font-weight: bold;
       border: none;
       border-radius: 8px;
-      background: #28a745;
-      color: #fff;
       cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
+      transition: 0.3s;
     }
-    .submit-btn:hover {
-      background: #218838;
+    button:hover {
+      background: #fff;
+      color: #000;
     }
-    .result-container {
-      margin-top: 15px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .code-display {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px;
-      background: #222;
+    .code-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 2px dashed #0f0;
       border-radius: 8px;
-      font-size: 18px;
       color: #0f0;
-    }
-    .action-buttons {
-      margin-top: 10px;
-    }
-    .action-btn {
-      margin: 5px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .copy-btn {
-      background: #007bff;
-      color: #fff;
-    }
-    .whatsapp-btn {
-      background: #25d366;
-      color: #fff;
-    }
-    /* Status banner */
-    #server-status {
-      text-align: center;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 14px;
+      display: none;
     }
   </style>
 </head>
-<body data-theme="dark">
-  <div class="container">
-    <!-- Server Status Banner -->
-    <div id="server-status">Checking server status...</div>
+<body>
+  <img src="https://files.catbox.moe/f6q239.jpg" alt="CRYPTIX Bot">
+  <h1>CRYPTIX MD</h1>
+  <p>Enter your WhatsApp number with country code to get a pairing code.</p>
+  <input type="text" id="number" placeholder="e.g. 254700000000">
+  <button onclick="getCode()">Get Pairing Code</button>
+  <div class="code-box" id="codeBox"></div>
 
-    <!-- Bot Image -->
-    <img src="https://files.catbox.moe/f6q239.jpg" alt="CRYPTIX Bot" class="bot-image">
-
-    <div class="card">
-      <h1>CRYPTIX Tech Pair Code</h1>
-      <p class="subtitle">Select your country and enter your WhatsApp number to generate your secure pairing code</p>
-      
-      <div class="input-group">
-        <select id="country-code" class="country-select"></select>
-        <input type="tel" id="phone-number" class="input-field" placeholder="Enter WhatsApp number">
-      </div>
-
-      <button class="submit-btn">Generate Pair Code</button>
-      <div class="result-container"></div>
-    </div>
-  </div>
-
-  <!-- Script -->
   <script>
-    // Country list with dialing codes
-    const countries = [
-      { name: "Kenya", code: "254" },
-      { name: "India", code: "91" },
-      { name: "USA", code: "1" },
-      { name: "UK", code: "44" },
-      { name: "South Africa", code: "27" },
-      { name: "Nigeria", code: "234" },
-      { name: "Brazil", code: "55" },
-      { name: "Indonesia", code: "62" },
-      { name: "Philippines", code: "63" },
-      { name: "Pakistan", code: "92" },
-      { name: "Bangladesh", code: "880" },
-      { name: "Germany", code: "49" },
-      { name: "France", code: "33" },
-      { name: "Italy", code: "39" },
-      { name: "Spain", code: "34" },
-      { name: "Canada", code: "1" },
-      { name: "Australia", code: "61" },
-      { name: "China", code: "86" },
-      { name: "Japan", code: "81" },
-      { name: "South Korea", code: "82" },
-      // You can expand this with all ITU codes (full list can be imported from JSON if needed)
-    ];
-
-    const countrySelect = document.getElementById("country-code");
-    countries.forEach(c => {
-      const option = document.createElement("option");
-      option.value = c.code;
-      option.textContent = `${c.name} (+${c.code})`;
-      countrySelect.appendChild(option);
-    });
-
-    // Server Status Checker
-    async function checkServerStatus() {
-      const statusDiv = document.getElementById("server-status");
-      try {
-        const res = await fetch("/status");
-        const data = await res.json();
-        statusDiv.textContent = data.status;
-        statusDiv.style.background = "#d4edda";
-        statusDiv.style.color = "#155724";
-        statusDiv.style.border = "1px solid #c3e6cb";
-      } catch (err) {
-        statusDiv.textContent = "🔴 Server Offline";
-        statusDiv.style.background = "#f8d7da";
-        statusDiv.style.color = "#721c24";
-        statusDiv.style.border = "1px solid #f5c6cb";
-      }
-    }
-
-    // Run on load and every 30s
-    window.addEventListener("DOMContentLoaded", () => {
-      checkServerStatus();
-      setInterval(checkServerStatus, 30000);
-    });
-
-    // Generate Pair Code
-    document.querySelector('.submit-btn').addEventListener('click', async () => {
-      const countryCode = document.getElementById('country-code').value;
-      const phoneNumber = document.getElementById('phone-number').value;
-      const resultContainer = document.querySelector('.result-container');
-
-      if (!countryCode || !phoneNumber) {
-        resultContainer.innerHTML = "⚠️ Please select your country and enter phone number";
+    async function getCode() {
+      const num = document.getElementById("number").value.trim();
+      if (!num) {
+        alert("❌ Please enter your WhatsApp number with country code!");
         return;
       }
-
-      const fullNumber = countryCode + phoneNumber;
-
-      // Show loading
-      resultContainer.innerHTML = '<div class="loader"></div> Generating pair code...';
-
       try {
-        const response = await fetch(`/pair?number=${fullNumber}`);
-        const data = await response.json();
-
-        if (data.code) {
-          resultContainer.innerHTML = `
-            ✅ Pair Code Generated!<br>
-            <span class="code-display">${data.code}</span>
-            <div class="action-buttons">
-              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
-              <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
-            </div>
-          `;
-
-          // Copy button
-          document.querySelector('.copy-btn').addEventListener('click', () => {
-            navigator.clipboard.writeText(data.code);
-            document.querySelector('.copy-btn').innerText = "Copied!";
-          });
-
-          // WhatsApp button
-          document.querySelector('.whatsapp-btn').addEventListener('click', () => {
-            window.open(`https://wa.me/?text=Here is my Pair Code: ${data.code}`, "_blank");
-          });
-
-        } else {
-          resultContainer.innerHTML = "❌ Failed to generate code";
-        }
-      } catch (err) {
-        console.error(err);
-        resultContainer.innerHTML = "❌ Server error, try again later.";
-      }
-    });
-  </script>
-</body>
-</html>    /* Status banner */
-    #server-status {
-      text-align: center;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-  </style>
-</head>
-<body data-theme="dark">
-  <div class="container">
-    <!-- Server Status Banner -->
-    <div id="server-status">Checking server status...</div>
-
-    <div class="logo-container">
-      <img src="https://files.catbox.moe/yedfbr.jpg" alt="Caseyrhodes Tech" class="logo">
-    </div>
-    
-    <div class="card">
-      <h1>Caseyrhodes Tech Pair Code</h1>
-      <p class="subtitle">Select your country and enter your WhatsApp number to generate your secure pairing code</p>
-      
-      <div class="input-group">
-        <select id="country-code" class="country-select">
-          <option value="">Select Country</option>
-          <option value="254">Kenya (+254)</option>
-          <option value="91">India (+91)</option>
-          <option value="1">USA (+1)</option>
-          <option value="44">UK (+44)</option>
-          <!-- add more countries -->
-        </select>
-        <input type="tel" id="phone-number" class="input-field" placeholder="Enter WhatsApp number">
-      </div>
-
-      <button class="submit-btn">Generate Pair Code</button>
-      <div class="result-container"></div>
-    </div>
-  </div>
-
-  <!-- Script -->
-  <script>
-    // Server Status Checker
-    async function checkServerStatus() {
-      const statusDiv = document.getElementById("server-status");
-      try {
-        const res = await fetch("/status");
+        const res = await fetch(`/pair?number=${num}`);
         const data = await res.json();
-        statusDiv.textContent = data.status;
-        statusDiv.style.background = "#d4edda";
-        statusDiv.style.color = "#155724";
-        statusDiv.style.border = "1px solid #c3e6cb";
-      } catch (err) {
-        statusDiv.textContent = "🔴 Server Offline";
-        statusDiv.style.background = "#f8d7da";
-        statusDiv.style.color = "#721c24";
-        statusDiv.style.border = "1px solid #f5c6cb";
-      }
-    }
-
-    // Run on load and every 30s
-    window.addEventListener("DOMContentLoaded", () => {
-      checkServerStatus();
-      setInterval(checkServerStatus, 30000);
-    });
-
-    // Generate Pair Code
-    document.querySelector('.submit-btn').addEventListener('click', async () => {
-      const countryCode = document.getElementById('country-code').value;
-      const phoneNumber = document.getElementById('phone-number').value;
-      const resultContainer = document.querySelector('.result-container');
-
-      if (!countryCode || !phoneNumber) {
-        resultContainer.innerHTML = "⚠️ Please select your country and enter phone number";
-        resultContainer.className = "result-container show warning";
-        return;
-      }
-
-      const fullNumber = countryCode + phoneNumber;
-
-      // Show loading
-      resultContainer.innerHTML = '<div class="loader"></div> Generating pair code...';
-      resultContainer.className = "result-container show";
-
-      try {
-        const response = await fetch(`/pair?number=${fullNumber}`);
-        const data = await response.json();
-
         if (data.code) {
-          resultContainer.innerHTML = `
-            ✅ Pair Code Generated!<br>
-            <span class="code-display">${data.code}</span>
-            <div class="action-buttons">
-              <button class="action-btn copy-btn"><i class="fa fa-copy"></i> Copy</button>
-              <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
-            </div>
-          `;
-
-          // Copy button
-          document.querySelector('.copy-btn').addEventListener('click', () => {
-            navigator.clipboard.writeText(data.code);
-            document.querySelector('.copy-btn').classList.add('copied');
-            document.querySelector('.copy-btn').innerText = "Copied!";
-          });
-
-          // WhatsApp button
-          document.querySelector('.whatsapp-btn').addEventListener('click', () => {
-            window.open(`https://wa.me/?text=Here is my Pair Code: ${data.code}`, "_blank");
-          });
-
+          document.getElementById("codeBox").style.display = "block";
+          document.getElementById("codeBox").innerText = "✅ Pairing Code: " + data.code;
+        } else if (data.error) {
+          alert(data.error);
         } else {
-          resultContainer.innerHTML = "❌ Failed to generate code";
-          resultContainer.className = "result-container show error";
+          alert(data.message);
         }
       } catch (err) {
-        console.error(err);
-        resultContainer.innerHTML = "❌ Server error, try again later.";
-        resultContainer.className = "result-container show error";
-      }
-    });
-  </script>
-</body>
-</html>              <button class="action-btn whatsapp-btn"><i class="fa fa-whatsapp"></i> Open WhatsApp</button>
-            </div>
-          `;
-
-          // Copy button
-          document.querySelector('.copy-btn').addEventListener('click', () => {
-            navigator.clipboard.writeText(data.code);
-            document.querySelector('.copy-btn').classList.add('copied');
-            document.querySelector('.copy-btn').innerText = "Copied!";
-          });
-
-          // WhatsApp button
-          document.querySelector('.whatsapp-btn').addEventListener('click', () => {
-            window.open(`https://wa.me/?text=Here is my Pair Code: ${data.code}`, "_blank");
-          });
-
-        } else {
-          resultContainer.innerHTML = "❌ Failed to generate code";
-          resultContainer.className = "result-container show error";
-        }
-      } catch (err) {
-        console.error(err);
-        resultContainer.innerHTML = "❌ Server error, try again later.";
-        resultContainer.className = "result-container show error";
-      }
-    });
-  </script>
-</body>
-</html>        }
-      } catch (err) {
-        document.getElementById('result').textContent = "🚨 Error: " + err.message;
+        alert("❌ Server error");
       }
     }
   </script>
