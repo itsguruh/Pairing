@@ -1,46 +1,62 @@
-// Import the necessary modules from your package.json
 const express = require('express');
 const pino = require('pino');
-const { WAConnection } = require('@whiskeysockets/baileys');
+const path = require('path');
+const { default: makeWASocket, useSingleFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
 
-// Create a new Express application instance
+// Express setup
 const app = express();
-
-// Set the port for the server, defaulting to 3000
 const PORT = process.env.PORT || 3000;
-
-// Set up a basic logger using pino
 const logger = pino({ level: 'debug' });
 
-// Set up a simple route for the root URL
+// Simple route
 app.get('/', (req, res) => {
-    res.send('Your Node.js app is running!');
+    res.send('CRYPTIX-MD WhatsApp bot is running!');
 });
 
-// An async function to set up the Baileys connection and other logic
+// Baileys auth state
+const authFile = path.resolve('./auth_info.json');
+const { state, saveState } = useSingleFileAuthState(authFile);
+
 async function startApp() {
     try {
-        // Here you would add the rest of your Baileys logic,
-        // such as creating the connection, listening for events, etc.
-        logger.info('Starting up the Baileys connection...');
+        logger.info('Starting Baileys connection...');
 
-        // Example: This is a placeholder for your actual code
-        const conn = new WAConnection();
+        const sock = makeWASocket({
+            auth: state,
+            printQRInTerminal: true,
+        });
 
-        // Connect and handle events
-        conn.on('open', () => logger.info('Connection to WhatsApp is now open!'));
-        await conn.connect();
+        sock.ev.on('connection.update', (update) => {
+            const { connection, lastDisconnect } = update;
+            if (connection === 'close') {
+                const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
+                logger.info('Connection closed. Reconnecting:', shouldReconnect);
+                if (shouldReconnect) {
+                    startApp();
+                } else {
+                    logger.info('Logged out from WhatsApp, please re-authenticate.');
+                    process.exit(0);
+                }
+            } else if (connection === 'open') {
+                logger.info('Connection opened!');
+            }
+        });
+
+        sock.ev.on('creds.update', saveState);
+
+        // You can add event handlers here, e.g., message handling
 
     } catch (error) {
-        logger.error(error, 'Failed to start the application.');
-        process.exit(1); // Exit with a failure code
+        logger.error(error, 'Failed to start Baileys connection.');
+        process.exit(1);
     }
 }
 
-// Start the Express server
+// Start Express server
 app.listen(PORT, () => {
-    logger.info(`Server is listening on port ${PORT}`);
+    logger.info(`Server listening on port ${PORT}`);
 });
 
-// Call the function to start the Baileys logic
+// Start Baileys connection
 startApp();
