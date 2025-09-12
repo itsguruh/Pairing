@@ -1,22 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const pino = require('pino');
-const {
-  default: makeWASocket,
-  useSingleFileAuthState,
-  DisconnectReason,
-  fetchLatestBaileysVersion
-} = require('@whiskeysockets/baileys');
-require('dotenv').config();
-const express = require('express');
-const pino = require('pino');
-const {
-  default: makeWASocket,
-  useSingleFileAuthState,
-  DisconnectReason,
-  fetchLatestBaileysVersion
-} = require('@whiskeysockets/baileys');
 const qrcode = require('qrcode');
+const {
+  default: makeWASocket,
+  useSingleFileAuthState,
+  fetchLatestBaileysVersion
+} = require('@whiskeysockets/baileys');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,11 +24,10 @@ app.get('/', (req, res) => {
   res.send(`
     <h1>🚀 CRYPTIX-MD Session Generator</h1>
     <p>Welcome! This server is running on Heroku ✅</p>
-    <p>Available routes:</p>
     <ul>
-      <li><a href="/status">/status</a> → check if bot is alive</li>
-      <li><a href="/qr">/qr</a> → get QR Code for scanning</li>
-      <li><a href="/pair">/pair</a> → get pairing code</li>
+      <li><a href="/status">/status</a></li>
+      <li><a href="/qr">/qr</a></li>
+      <li><a href="/pair">/pair</a></li>
     </ul>
   `);
 });
@@ -55,7 +44,7 @@ app.get('/status', (req, res) => {
 // QR route
 app.get('/qr', async (req, res) => {
   if (!qrCodeBase64) {
-    return res.status(404).send('QR Code not available yet. Please refresh.');
+    return res.status(404).send('QR Code not available yet.');
   }
   const img = Buffer.from(qrCodeBase64.split(',')[1], 'base64');
   res.writeHead(200, {
@@ -68,12 +57,12 @@ app.get('/qr', async (req, res) => {
 // Pairing route
 app.get('/pair', async (req, res) => {
   if (!pairingCode) {
-    return res.status(404).send('Pairing code not generated yet. Please refresh.');
+    return res.status(404).send('Pairing code not generated yet.');
   }
   res.send(`
     <h2>🔗 Your Pairing Code</h2>
     <p><b>${pairingCode}</b></p>
-    <p>Use this inside WhatsApp app → Linked Devices → Enter Code</p>
+    <p>Use this in WhatsApp → Linked Devices → Enter Code</p>
   `);
 });
 
@@ -83,7 +72,7 @@ async function startBot() {
   const sock = makeWASocket({
     version,
     auth: state,
-    printQRInTerminal: true, // will still print on logs
+    printQRInTerminal: true,
     logger
   });
 
@@ -104,26 +93,31 @@ async function startBot() {
     } else if (connection === 'close') {
       isConnected = false;
       logger.error('Bot disconnected ❌');
-      setTimeout(startBot, 5000); // auto restart
+      setTimeout(startBot, 5000); // auto-restart
     }
   });
 
   sock.ev.on('creds.update', saveState);
 
-  // Generate a pairing code after connection if supported
+  // Pairing code
+  if (!process.env.NUMBER) {
+    logger.warn("⚠️ 'NUMBER' not set in environment variables. Skipping pairing code.");
+    return;
+  }
+
   try {
-    const code = await sock.requestPairingCode(process.env.NUMBER || "");
+    const code = await sock.requestPairingCode(process.env.NUMBER);
     if (code) {
       pairingCode = code;
       qrCodeBase64 = null;
       logger.info('Pairing code generated.');
     }
   } catch (err) {
-    logger.error("Pairing code not available:", err);
+    logger.error("Failed to get pairing code:", err);
   }
 }
 
-// Start Express + Bot
+// Start server + bot
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   startBot();
